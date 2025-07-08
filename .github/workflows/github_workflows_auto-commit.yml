@@ -1,0 +1,34 @@
+name: Auto Add Mario Level
+
+on:
+  schedule:
+    - cron: '30 16 * * *'  # 23:30 WIB (UTC+7)
+  workflow_dispatch:
+
+jobs:
+  auto-commit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Add new level
+        run: |
+          LEVEL_FILE="levels/level-$(date +%Y%m%d).txt"
+          mkdir -p levels
+          echo "Level generated on $(date)" > "$LEVEL_FILE"
+          echo "#######" >> "$LEVEL_FILE"
+          echo "#     #" >> "$LEVEL_FILE"
+          echo "#  M  #" >> "$LEVEL_FILE"
+          echo "#######" >> "$LEVEL_FILE"
+
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Commit and push if changed
+        run: |
+          git add levels/
+          git commit -m "Auto add new level for $(date +%Y-%m-%d) [skip ci]" || echo "No changes to commit"
+          git push
